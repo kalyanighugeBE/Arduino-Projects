@@ -1,0 +1,34 @@
+void setup() {
+  // Initialize Serial communication
+  Serial.begin(9600);
+
+  // Set LED pins as OUTPUT
+  pinMode(atriumLED, OUTPUT);
+  pinMode(ventricleLED, OUTPUT);
+}
+
+void loop() {
+  // Read values from photoresistors
+  int sensorValueA0 = analogRead(A0);
+  int sensorValueA3 = analogRead(A3);
+
+  // Print values to Serial Monitor
+  Serial.print(sensorValueA0);
+  Serial.print(" ");
+  Serial.println(sensorValueA3);
+
+  // Control LEDs based on sensor values
+  // Change thresholds as needed
+  if (sensorValueA0 < 500) {
+    digitalWrite(atriumLED, HIGH);
+  } else {
+    digitalWrite(atriumLED, LOW);
+  }
+
+  if (sensorValueA3 < 500) {
+    digitalWrite(ventricleLED, HIGH);
+  } else {
+    digitalWrite(ventricleLED, LOW);
+  }
+  delay(100);
+}

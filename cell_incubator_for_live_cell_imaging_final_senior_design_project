@@ -1,0 +1,140 @@
+#include <DHT.h> //for humidity
+#include <SoftwareSerial.h> //for carbon dioxide (pre-installed)
+#include <DS1307RTC.h> //for the clock on the arduino spiker shield
+#include <Wire.h> 
+#include <SD.h> //for the SD card
+
+#define DHTPIN 4      // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT22 // DHT 22  (AM2302)
+
+#define MHZ19_RX 2   // RX pin of MH-Z19B 
+#define MHZ19_TX 3   // TX pin of MH-Z19B 
+
+#define HFAN_PIN1 5 //Relay pin connected to IN4
+#define HFAN_PIN2 6 //Relay pin connected to IN3
+#define FAN_PIN1 7 //Relay pin connected to IN2
+#define FAN_PIN2 8 //Relay pin connected to IN1
+
+DHT dht(DHTPIN, DHTTYPE);
+SoftwareSerial co2Serial(MHZ19_RX, MHZ19_TX); // RX, TX
+const int chipSelect = 10; //Pin connection to SD card
+
+File dataFile;
+
+void setup() {
+  Serial.begin(9600);
+  co2Serial.begin(9600);
+  dht.begin();
+  pinMode(HFAN_PIN1, OUTPUT);
+  pinMode(HFAN_PIN2, OUTPUT);
+  pinMode(FAN_PIN1, OUTPUT);
+  pinMode(FAN_PIN2, OUTPUT);
+
+  setSyncProvider(RTC.get); //setting the RTC as the time provider
+
+  if(!SD.begin(chipSelect)) {
+    Serial.println("SD card error.");
+    return;
+  }
+
+  dataFile = SD.open("sensor_data.csv", FILE_WRITE); //starting a file to write data
+  if (dataFile) {
+    dataFile.println("Date, Time, Humidity %, Temperature (Celsius), CO2 (ppm)" );
+    dataFile.close();
+  } else {
+    Serial.println("Error opening file");
+    dataFile = SD.open("Sensor_data.csv", FILE_WRITE);
+  }
+}
+
+void loop() {
+  delay(5000);  // Delay for 20 seconds 
+
+  float time_t = now(); //read time
+
+  // Read temperature and humidity from DHT sensor
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  // Check if any DHT reads failed and exit early (to try again)
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    humidity = dht.readHumidity();
+    temperature = dht.readTemperature();
+  }
+
+  // Read CO2 level from MH-Z19B sensor
+  uint16_t ppm; //function for obtaining carbon dioxide reading
+  co2Serial.write(0xFF);
+  co2Serial.write(0x01);
+  co2Serial.write((byte)0x86); //carbon dioxide detection
+  co2Serial.write((byte)0x00); //waiting for communication
+  co2Serial.write((byte)0x00);
+  co2Serial.write((byte)0x00);
+  co2Serial.write((byte)0x00);
+  co2Serial.write((byte)0x79); //response
+
+  delay(100);
+
+  while (co2Serial.available()) {
+    if (co2Serial.read() == 0xFF) {
+      if (co2Serial.read() == 0x86) {
+        byte response[7]; //7 bytes of response
+        for (int i = 0; i < 7; i++) {
+          response[i] = co2Serial.read();
+        }
+        ppm = (response[1] << 8) | response[2];
+      }
+    }
+  }
+
+  // Output values to Serial Monitor (can delete)
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print("% - Temperature: ");
+  Serial.print(temperature);
+  Serial.print("°C - CO2: ");
+  Serial.print(ppm);
+  Serial.println(" ppm");
+  
+  if (temperature < 40) {
+    digitalWrite(HFAN_PIN1, HIGH);
+    digitalWrite(HFAN_PIN2, HIGH);
+    digitalWrite(FAN_PIN1, LOW);
+    digitalWrite(FAN_PIN2, LOW);
+  } else {
+    digitalWrite(HFAN_PIN1, LOW);
+    digitalWrite(HFAN_PIN2, LOW);
+    digitalWrite(FAN_PIN1, HIGH);
+    digitalWrite(FAN_PIN2, HIGH);
+  }
+
+   // log data every 30 mins
+  if (minute(time_t) % 30 == 0 && second(time_t) == 0) {
+   logData(time_t, humidity, temperature, ppm);
+  }
+}
+
+void logData(time_t timestamp, float humidity, float temperature, float ppm) {
+  dataFile = SD.open("sensor_data.csv", FILE_WRITE);
+  if (dataFile) {
+    dataFile.print(day(timestamp));
+    dataFile.print("/");
+    dataFile.print(hour(timestamp));
+    dataFile.print(":");
+    dataFile.print(minute(timestamp));
+    dataFile.print(":");
+    dataFile.print(second(timestamp));
+    dataFile.print(",");
+    dataFile.print(humidity);
+    dataFile.print(",");
+    dataFile.print(temperature);
+    dataFile.print(",");
+    dataFile.print(ppm);
+    dataFile.println(); // Add newline at the end for next entry
+    dataFile.close();
+    Serial.println("Data logged");
+  } else {
+    Serial.println("Error opening file");
+  }
+}

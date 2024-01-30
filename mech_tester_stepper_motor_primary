@@ -1,0 +1,61 @@
+int i;
+int sign;
+float result;
+int clockpin = 3;  
+int datapin = 2;
+int bitread;
+int prev_clock;
+int now_clock;
+int sequence_index = 0;
+int new_sequence;
+char sequence_string[16];
+int value;
+
+void setup() {
+  // put your setup code here, to run once:
+
+ Serial.begin(9600);
+  pinMode(clockpin, INPUT);
+  pinMode(datapin, INPUT);
+}
+//declared clockpin (white wire) and datapin (black wire)
+
+void loop() {
+  // put your main code here, to run repeatedly:
+ now_clock=digitalRead(clockpin);
+ if (now_clock==HIGH && prev_clock == LOW ) { //wait for the step up
+  bitread = digitalRead(datapin);
+ if ((prev_clock-now_clock)>100000) {
+  //detecting the start of a new binary sequence
+  now_clock = micros();
+  new_sequence == true;
+ }
+ 
+if (new_sequence == true) {
+  value = strtol(sequence_string, NULL,2);
+  if (sign == 0){
+Serial.println (-value*0.01);
+  }
+  else {
+    Serial.println(value*0.01);
+  }
+
+
+   if (sequence_index<16) {
+    if (bitread >= 1) {
+  sequence_string[15-sequence_index]="0";
+ }
+ 
+ else {
+   sequence_string[15-sequence_index]="1";
+ }
+}              
+
+if (sequence_index == 20) {
+  sign = bitread;
+}
+sequence_index = sequence_index+1;
+prev_clock = now_clock;
+}
+}
+}

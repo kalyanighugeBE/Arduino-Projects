@@ -1,0 +1,51 @@
+/* Example sketch to control a stepper motor with TB6600 stepper motor driver and Arduino without a library: number of revolutions, speed and direction. More info: https://www.makerguides.com */
+
+// Define stepper motor connections and steps per revolution:
+#define dirPin 2
+#define stepPin 3
+#define enPin 4
+#define stepsPerRevolution 1600
+
+void setup() {
+  // Declare pins as output:
+  pinMode(stepPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(enPin, OUTPUT);
+  digitalWrite(enPin, LOW);
+
+  // Initialize the serial communication:
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    // Read the incoming byte:
+    int command = Serial.read();
+
+    switch (command) {
+      case 'C':
+        // Set the spinning direction clockwise:
+        digitalWrite(dirPin, HIGH);
+        digitalWrite(enPin, LOW);
+        break;
+
+      case 'D':
+        // Set the spinning direction counterclockwise:
+        digitalWrite(dirPin, LOW);
+        digitalWrite(enPin, LOW);
+        break;
+
+      case 'S':
+        // Stop the motor:
+        digitalWrite(enPin, HIGH);
+        
+        break;
+    }
+  } else {
+    // Continuously spin the motor:
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(500);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(500);
+  }
+}

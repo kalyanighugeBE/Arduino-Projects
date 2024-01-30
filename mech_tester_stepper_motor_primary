@@ -28,7 +28,7 @@ void loop() {
  if ((prev_clock-now_clock)>100000) {
   //detecting the start of a new binary sequence
   now_clock = micros();
-  new_sequence == true;
+  new_sequence = true;
  }
  
 if (new_sequence == true) {

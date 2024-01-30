@@ -1,0 +1,71 @@
+#define LED 12
+#define BUZ 9
+
+void setup() {
+pinMode(LED,OUTPUT);
+pinMode(BUZ,OUTPUT);
+}
+
+void loop() {
+
+  // S
+  digitalWrite(LED,HIGH);
+  tone(BUZ,5000);
+  delay(30000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(30000);
+  digitalWrite(LED,HIGH);
+  tone(BUZ,5000);
+  delay(30000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(30000);
+  digitalWrite(LED,HIGH);
+  tone(BUZ,5000);
+  delay(30000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(100000);
+
+  // O
+  digitalWrite(LED,HIGH);
+  tone(BUZ,3000);
+  delay(90000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(90000);
+  digitalWrite(LED,HIGH);
+  tone(BUZ,3000);
+  delay(90000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(90000);
+  digitalWrite(LED,HIGH);
+  tone(BUZ,3000);
+  delay(90000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(90000);
+
+  // S
+  digitalWrite(LED,HIGH);
+  tone(BUZ,5000);
+  delay(30000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(30000);
+  digitalWrite(LED,HIGH);
+  tone(BUZ,5000);
+  delay(30000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(30000);
+  digitalWrite(LED,HIGH);
+  tone(BUZ,5000);
+  delay(30000);
+  digitalWrite(LED,LOW);
+  noTone(BUZ);
+  delay(1000);
+ 
+}

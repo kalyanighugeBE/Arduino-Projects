@@ -1,0 +1,59 @@
+// Define stepper motor connections and steps per revolution:
+#define dirPin 6
+#define stepPin 5
+#define enPin 4
+#define stepsPerRevolution 1600
+char incomingrotation = 0; // for incoming serial data
+char incomingspeed = 0; // for pulse rate
+int command='S';
+
+void setup() {
+  // put your setup code here, to run once:
+ Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
+ 
+  // Declare pins as output:
+  pinMode(stepPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(enPin,OUTPUT);
+  digitalWrite(enPin, LOW);
+  Serial.println("Enter rotation direction - C, W or S");
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+ // Set the spinning direction clockwise:
+
+ if (Serial.available() > 0){ //read command
+   // read incoming character:
+     command = Serial.read();
+ }
+
+ if (command == 'C'){
+ 
+  // Set the spinning direction clockwise:
+  digitalWrite(dirPin, HIGH);
+  digitalWrite(enPin, LOW);
+  
+}
+  if (command == 'W') {
+
+   // Set the spinning direction counterclockwise:
+  digitalWrite(dirPin, LOW);
+  digitalWrite(enPin, LOW);
+ 
+ }
+ if (command == 'S') {
+   
+   // Set the spinning direction counterclockwise:
+  
+  digitalWrite(enPin, HIGH);
+ }
+// Spin the stepper motor 0.25 revolutions fast:
+  for (int i = 0; i < 0.2 * stepsPerRevolution; i++) {
+    // These four lines result in 1 step:
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(2000);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(2000);
+  } 
+}
